@@ -1,0 +1,35 @@
+{
+  "name": "@tanglemesh/message.js",
+  "version": "1.0.0",
+  "description": "A simple package to do messaging tasks for publishing to the tangle (eg. MAM)",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tangleMesh/message.js.git"
+  },
+  "keywords": [
+    "IOTA",
+    "tangle",
+    "iotatoken",
+    "MAM",
+    "message"
+  ],
+  "author": "tangleMesh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tangleMesh/message.js/issues"
+  },
+  "homepage": "https://tangle-mesh.io",
+  "dependencies": {
+    "@iota/converter": "^1.0.0-beta.21",
+    "@iota/mam": "^0.7.3",
+    "@tanglemesh/api-client.js": "^1.0.5",
+    "nodemon": "^1.19.4"
+  }
+}
