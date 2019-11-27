@@ -34,12 +34,18 @@ module.exports = class TMProvider extends Provider {
     }
 
     async updateState (messageStream) {
-        // TODO: Fetch the latest MessageUpdate of the MessageStream and set the state accordingly (should be free!) from the tangleMesh:api
+        //Fetch the latest MessageUpdate of the MessageStream and set the state accordingly (should be free!) from the tangleMesh:api
         const result = await this._apiClient.get (
-            "/messages/streams/" + messageStream
+            "/messages/streams/root/" + messageStream.State.Root
         );
-        // TODO: this method should return the MessageStream and also the latest MessageUpdate (with the newest State)
-        // TODO: update messageStream.State with the values
+        //this method should return the MessageStream and also the latest MessageUpdate (with the newest State)
+        //update messageStream.State with the values
+        const messageUpdate = result.messageUpdate;
+        messageStream.State.NextRoot = messageUpdate.nextRoot;
+        messageStream.State.Start = messageUpdate.start;
+        messageStream.State.Count = messageUpdate.count;
+        messageStream.State.NextCount = messageUpdate.nextCount;
+        messageStream.State.Index = messageUpdate.index;
 
         return messageStream.State;
     }
@@ -61,11 +67,11 @@ module.exports = class TMProvider extends Provider {
         type: null, // can be "transactional" or "promotional"
         orderByDate: "desc", // can be "desc" (descending) or "asc" (ascending)
     }) {
-        // TODO: messages = request to tangleMesh:api to fetch the correct messages (only transactional, or promotional, …)
+        // messages = request to tangleMesh:api to fetch the correct messages (only transactional, or promotional, …)
         // Fetch the messages with the applied filters via the tangleMesh:api. The Benefit is, that you have not to go through the complete stream-tree, but simply fetch the messages you need.
         // Also you do not have only the temporary messages until the next snapshot, but you have all historical data of this stream. (Only a small fee will be applied on reading messages.)
         const result = await this._apiClient.get (
-            "messages/messages/" + messageStream.State.Root,
+            "messages/root/" + messageStream.State.Root + "/messages",
             {
                 start: filters.start ? filters.start : undefined,
                 limit: filters.limit ? filters.limit : undefined,
