@@ -15,7 +15,7 @@ module.exports = class Stream {
 
     static async createPublisherStream (messageProvider, seed, mode = Mode.PUBLIC, security = 2, sideKey = null) {
         const stream = new Stream (messageProvider, seed, mode, security, sideKey);
-        await stream.Provider.createStream (this);
+        await stream.Provider.createStream (stream);
         await stream.init ();
         return stream;
     }
@@ -80,7 +80,9 @@ module.exports = class Stream {
         const deletionMessages = await this.sendMessages (
             Message.createMessage (
                 this,
-                null,
+                {
+                    message: "deleted stream",
+                },
                 Message.TYPE_DELETION
             ),
         );
@@ -89,13 +91,25 @@ module.exports = class Stream {
 
     subscribe (
         callback = (messages = []) => messages, 
+        fromRoot = null,
         timeout = null
     ) {
+        if (fromRoot === null) {
+            fromRoot = this.State.NextRoot;
+        }
         //use the timeout from the state object (default: 5000ms)
         setTimeout (async () => {
             //Fetch all new messages (without any filters, but all)
-            const messages = await this.fetchMessages ();
-            return callback (messages);
+            const messages = await this.fetchMessages ({
+                fromRoot,
+            });
+            for (const message of messages) {
+                callback (message);
+            }
+            if (messages.length >= 1) {
+                fromRoot = this.State.NextRoot;
+            }
+            return this.subscribe (callback, fromRoot, timeout);
         }, timeout === null ? this.State.Timeout : timeout);
     }
 

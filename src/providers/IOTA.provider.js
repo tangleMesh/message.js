@@ -80,6 +80,12 @@ module.exports = class IOTAProvider extends Provider {
             );
         }
 
+        //Update state
+        if (messages.length >= 1) {
+            messageStream.State.NextRoot = fetchResult.nextRoot;
+            messageStream.State.Start = messageStream.State.Start + messages.length;
+        }
+
         return messages;
     }
 

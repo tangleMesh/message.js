@@ -5,9 +5,10 @@ const { ApiAuthentificator, ApiClient } = require ("@tanglemesh/api-client.js");
 
 module.exports = class TMProvider extends Provider {
 
-    constructor (provider, apiAuthentificator, attatchToTangle = null) {
+    constructor (provider, apiAuthentificator, channelId, attatchToTangle = null) {
         super (provider, apiAuthentificator.applicationName, attatchToTangle);
         this._iotaProvider = new IOTAProvider (provider, apiAuthentificator.applicationName, attatchToTangle);
+        this._channelId = channelId;
 
         if (!(apiAuthentificator instanceof ApiAuthentificator)) {
             throw new Error ("Message.js: The apiAuthentificator must be a valid instance of ApiAuthentificator from package \"@tanglemesh/api-client.js\"!");
@@ -19,7 +20,7 @@ module.exports = class TMProvider extends Provider {
     }
 
     async createStream (messageStream) {
-        //TODO: Make request to the tangleMesh:api and create a channel (which will automatically set up a storage for this message stream/channel)
+        // Make request to the tangleMesh:api and create a channel (which will automatically set up a storage for this message stream/channel)
         const result = await this._apiClient.post (
             "/messages/streams",
             {
@@ -27,7 +28,7 @@ module.exports = class TMProvider extends Provider {
                 root: messageStream.State.Root,
                 security: messageStream.State.Security,
                 sideKey: messageStream.State.SideKey,
-                provider: messageStream.State.Provider,
+                provider: messageStream.Provider.Provider,
             }
         );
         //Validate result, should be okay, if no Error has been thrown ;)
@@ -54,7 +55,7 @@ module.exports = class TMProvider extends Provider {
         let state = messageStream.State;
 
         //Simply create a message and publish it via the IOTAprovider, because our service will automatically track these messages via a tangleMesh:service
-        this._iotaProvider.publishMessages (...messages); 
+        await this._iotaProvider.publishMessages (messageStream, ...messages); 
 
         messageStream.State = state;
         return messages;
@@ -73,6 +74,7 @@ module.exports = class TMProvider extends Provider {
         const result = await this._apiClient.get (
             "messages/root/" + messageStream.State.Root + "/messages",
             {
+                channelId: this._channelId,
                 start: filters.start ? filters.start : undefined,
                 limit: filters.limit ? filters.limit : undefined,
                 fromRoot: filters.fromRoot ? filters.fromRoot : undefined,
@@ -82,11 +84,18 @@ module.exports = class TMProvider extends Provider {
         );
 
         const messages = [];
-        for (const message of result.result) {
+        for (const message of result.results) {
             messages.push (
                 new Message (messageStream, message.trytes)
             );
         }
+
+        //Update state
+        if (messages.length >= 1) {
+            messageStream.State.NextRoot = result.results [result.results.length - 1].nextRoot;
+            messageStream.State.Start = messageStream.State.Start + messages.length;
+        }
+
         return messages;
     }
 
