@@ -1,5 +1,7 @@
 const Mode = require ('./mode');
 const Mam = require ('@iota/mam');
+const { isTrytes } = require ('@iota/validators')
+const { asciiToTrytes } = require('@iota/converter');
 
 module.exports = class State {
 
@@ -8,7 +10,7 @@ module.exports = class State {
         this._root = root;
         this._security = security;
         this._mode = mode;
-        this._sideKey = sideKey;
+        this._sideKey = sideKey === null ? null : asciiToTrytes (sideKey);
 
         this.start = 0;
         this._index = 0;
@@ -113,7 +115,15 @@ module.exports = class State {
     }
 
     set SideKey (value) {
-        this._sideKey = value;
+        if (value !== null) {
+            if (!isTrytes (value, 81)) {
+                this._sideKey = asciiToTrytes (value.replace(/9+$/gi, '')).padEnd (81, '9');
+            } else {
+                this._sideKey = value.substr (0, 81);
+            }
+        } else {
+            this._sideKey = null;
+        }
     }
 
 

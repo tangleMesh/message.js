@@ -34,7 +34,11 @@ module.exports = class Stream {
             provider: this._provider.Provider,
             attachToTangle: this._provider.AttatchToTangle === null ? undefined : this._provider.AttatchToTangle,
         }, seed, security);
-        this._state.MamState = Mam.changeMode (this._state.MamState, mode, sideKey === null ? undefined : sideKey);
+        
+        //instead of calling Mam.changeMode, we set the parameters directy in the state object
+        this._state.SideKey = sideKey;
+        this._state.Mode = mode;
+        // this._state.MamState = Mam.changeMode (this._state.MamState, mode, sideKey === null ? undefined : this._state.SideKey);
     }
 
     // Initialize the MAM-State and everything

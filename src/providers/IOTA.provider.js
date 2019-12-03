@@ -24,6 +24,7 @@ module.exports = class IOTAProvider extends Provider {
         messageStream.State.NextRoot = fetchResult.nextRoot;
         messageStream.State.Start = messageStream.State.Start + fetchResult.messages.length;
 
+        // Return the updated state
         return messageStream.State;
     }
 
