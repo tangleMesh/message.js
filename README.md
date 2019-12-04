@@ -181,7 +181,7 @@ Also a message contains always the `message.Trytes` that get send to the tangle,
 
 
 ## Methods
-
+You can read more about the available classes and methods in our [Documentation](DOCUMENTATION.md).
 
 
 ## Examples

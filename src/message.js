@@ -1,22 +1,32 @@
 const LZString = require ('lz-string');
-const Mam = require('@iota/mam');
 const { asciiToTrytes, trytesToAscii } = require('@iota/converter');
 
-module.exports = class Message {
+/**
+ * Class representing the a MAM message
+ * @class
+ */
+class Message {
 
+    /**
+     * @type {string} the message type for Deletion
+     */
     static get TYPE_DELETION () {
         return "deletion";
     }
 
+    /**
+     * @type {string} the message type for Promotional
+     */
     static get TYPE_PROMOTIONAL () {
         return "promotional";
     }
 
+    /**
+     * @type {string} the message type for Transactional
+     */
     static get TYPE_TRANSACTIONAL () {
         return "transactional";
     }
-
-
 
     constructor (messageStream, trytes) {
         this._messageStream = messageStream;
@@ -25,7 +35,15 @@ module.exports = class Message {
     }
 
 
-
+    /**
+     * Create a new MAM message
+     * @async
+     * @param {Stream} messageStream - the stream this message should get published in or fetched from
+     * @param {string|int|Object|Array} message - the actual content that should get published
+     * @param {string} type - the type of this message
+     * @param {string|null} publisher - the publisher of this message
+     * @type {Message} the created message
+     */
     static createMessage (messageStream, message, type = Message.TYPE_TRANSACTIONAL, publisher = null) {
         // --- Create structure for message
         /*
@@ -72,19 +90,30 @@ module.exports = class Message {
     
 
     
-
+    /**
+     * @type {string} the message as trytes string
+     */
     get Trytes () {
         return this._trytes;
     }
 
+    /**
+     * @type {Object} the raw message object
+     */
     get Raw () {
         return Message._decodeMessage (this._trytes);
     }
 
+    /**
+     * @type {string|int|Object|Array} the actual content of the message
+     */
     get Message () {
         return this.Raw.message;
     }
 
+    /**
+     * @type {Array} all transactions if this message is already attatched to the tangle
+     */
     get Transactions () {
         return this._transactions;
     }
@@ -93,16 +122,27 @@ module.exports = class Message {
         this._transactions = transactions;
     }
 
+    /**
+     * @type {string} the type of this message
+     */
     get Type () {
         return this.Raw.type;
     }
 
+    /**
+     * @type {string} the publisher of this message
+     */
     get Publisher () {
         return this.Raw.publisher;
     }
 
+    /**
+     * @type {Date} the timestamp of this message
+     */
     get Timestamp () {
         return new Date (this.Raw.timestamp);
     }
 
 };
+
+module.exports = Message;
